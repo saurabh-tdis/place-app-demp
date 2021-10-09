@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -31,7 +33,7 @@ public class PlaceServiceImpl implements PlaceService {
     private PlaceRepository placeRepository;
 
     @Override
-    public Place savePlace(Place place) {
+    public Mono<Place> savePlace(Place place) {
         if(!StringUtils.hasText(place.getCity())){
             throw new PlaceNotFoundException("Please provide valid place city");
         }
@@ -47,11 +49,11 @@ public class PlaceServiceImpl implements PlaceService {
         place = this.placeRepository.save(place);
 
         log.info("place is saved in db with id "+place.getId());
-        return place;
+        return Mono.just(place);
     }
 
     @Override
-    public Place updatePlace(Place place) {
+    public Mono<Place> updatePlace(Place place) {
         if(place.getId()==null){
             throw new PlaceNotFoundException("Please provide valid place id");
         }
@@ -70,49 +72,53 @@ public class PlaceServiceImpl implements PlaceService {
         place = this.placeRepository.save(placeDb);
 
         log.info("place is updated in db with id "+place.getId());
-        return place;
+        return Mono.just(place);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Place getPlaceById(Long id) {
+    public Mono<Place> getPlaceById(Long id) {
         if(id==null){
             throw new PlaceNotFoundException("Please provide valid place id");
         }
         log.info("Returning place with given id "+id);
-        return this.placeRepository.findById(id).orElseThrow(()->new PlaceNotFoundException("No Place Found with given id"));
+        return Mono.just(this.placeRepository.findById(id).orElseThrow(()->new PlaceNotFoundException("No Place Found with given id")));
     }
 
     @Override
-    public Boolean deletePlaceById(Long id) {
-        Place place = this.getPlaceById(id);
-        place.setStatus(Status.INACTIVE);
-        log.info("Place is deleted with id = "+id);
-        return true;
+    public Mono<Boolean> deletePlaceById(Long id) {
+        this.getPlaceById(id).flatMap(place->{
+            place.setStatus(Status.INACTIVE);
+
+            log.info("Place is deleted with id = "+id);
+            placeRepository.save(place);
+            return Mono.just(place);
+        }).subscribe();
+        return Mono.just(true);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Place> searchPlace(String cityName) {
+    public Flux<Place> searchPlace(String cityName) {
         if(!StringUtils.hasText(cityName)){
             throw new PlaceNotFoundException("Please provide valid city name");
         }
         log.info("Returning place with given cityName "+cityName);
-        return this.placeRepository.findByNameIgnoreCaseContaining(cityName.trim());
+        return Flux.fromIterable(this.placeRepository.findByNameIgnoreCaseContaining(cityName.trim()));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Place> getPlaceByStateName(String stateName) {
+    public Flux<Place> getPlaceByStateName(String stateName) {
         if(!StringUtils.hasText(stateName)){
             throw new PlaceNotFoundException("Please provide valid state name");
         }
-        return this.placeRepository.findByStateIgnoreCase(stateName.trim());
+        return Flux.fromIterable(this.placeRepository.findByStateIgnoreCase(stateName.trim()));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Place> getPlaceBetweenTwoCities(String city1, String city2) {
+    public Flux<Place> getPlaceBetweenTwoCities(String city1, String city2) {
         if(!StringUtils.hasText(city1)){
             throw new PlaceNotFoundException("Please provide valid first city name");
         }
@@ -120,12 +126,12 @@ public class PlaceServiceImpl implements PlaceService {
         if(!StringUtils.hasText(city2)){
             throw new PlaceNotFoundException("Please provide valid second city name");
         }
-        return this.placeRepository.findPlaceByCityIn(Arrays.asList(city1.toLowerCase().trim(),city2.toLowerCase().trim()));
+        return Flux.fromIterable(this.placeRepository.findPlaceByCityIn(Arrays.asList(city1.toLowerCase().trim(),city2.toLowerCase().trim())));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Place> getAllPlaces() {
-        return placeRepository.findAll();
+    public Flux<Place> getAllPlaces() {
+        return Flux.fromIterable(placeRepository.findAll());
     }
 }

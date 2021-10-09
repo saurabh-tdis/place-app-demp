@@ -1,6 +1,8 @@
 package com.app.service;
 
 import com.app.entity.Place;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -9,19 +11,19 @@ import java.util.List;
  * @Date 06-10-2021
  */
 public interface PlaceService {
-    Place savePlace(Place place);
+    Mono<Place> savePlace(Place place);
 
-    Place updatePlace(Place place);
+    Mono<Place> updatePlace(Place place);
 
-    Place getPlaceById(Long id);
+    Mono<Place> getPlaceById(Long id);
 
-    Boolean deletePlaceById(Long id);
+    Mono<Boolean> deletePlaceById(Long id);
 
-    List<Place> searchPlace(String cityName);
+    Flux<Place> searchPlace(String cityName);
 
-    List<Place> getPlaceByStateName(String stateName);
+    Flux<Place> getPlaceByStateName(String stateName);
 
-    List<Place> getPlaceBetweenTwoCities(String city1, String city2);
+    Flux<Place> getPlaceBetweenTwoCities(String city1, String city2);
 
-    List<Place> getAllPlaces();
+    Flux<Place> getAllPlaces();
 }

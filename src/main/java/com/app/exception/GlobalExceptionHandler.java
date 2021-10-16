@@ -4,9 +4,8 @@ import com.app.dto.ApiResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import reactor.core.publisher.Mono;
 
 /**
@@ -16,7 +15,7 @@ import reactor.core.publisher.Mono;
 
 @RestControllerAdvice
 @Log4j2
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler  {
 
     @ExceptionHandler(value = PlaceNotFoundException.class)
     public Mono<ResponseEntity<ApiResponse>> handleException(PlaceNotFoundException ex){

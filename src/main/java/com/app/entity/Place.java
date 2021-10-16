@@ -4,9 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.*;
 import java.time.LocalDate;
 
 /**
@@ -18,12 +19,11 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name="place")
+@Table(value="place")
 public class Place {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)  // not present in r2dbc
     private Long id;
 
     private String name;
@@ -32,10 +32,10 @@ public class Place {
 
     private String state;
 
-    @Column(name="created_date")
+    @Column(value="created_date")
     private LocalDate createdDate ;
 
-    @Enumerated(EnumType.STRING)
+//    @Enumerated(EnumType.STRING) // not present
     private Status status;
 
 }

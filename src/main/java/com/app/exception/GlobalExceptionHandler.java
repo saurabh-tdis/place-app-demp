@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import reactor.core.publisher.Mono;
 
 /**
  * @author Saurabh Vaish
@@ -18,9 +19,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = PlaceNotFoundException.class)
-    public ResponseEntity<ApiResponse> handleException(PlaceNotFoundException ex){
+    public Mono<ResponseEntity<ApiResponse>> handleException(PlaceNotFoundException ex){
         log.warn(ex.getMessage());
-        return ResponseEntity.badRequest().body(new ApiResponse(null, ex.getMessage(), HttpStatus.BAD_REQUEST));
+        return Mono.just(ResponseEntity.badRequest().body(new ApiResponse(null, ex.getMessage(), HttpStatus.BAD_REQUEST)));
     }
 
 }

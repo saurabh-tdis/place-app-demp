@@ -104,7 +104,8 @@ public class PlaceServiceImpl implements PlaceService {
             throw new PlaceNotFoundException("Please provide valid city name");
         }
         log.info("Returning place with given cityName "+cityName);
-        return Flux.fromIterable(this.placeRepository.findByNameIgnoreCaseContaining(cityName.trim()));
+        return Flux.fromIterable(this.placeRepository.findByNameIgnoreCaseContaining(cityName.trim()))
+                .switchIfEmpty(r->Flux.error(new PlaceNotFoundException("No place found with the following city name")));
     }
 
     @Override
@@ -113,7 +114,8 @@ public class PlaceServiceImpl implements PlaceService {
         if(!StringUtils.hasText(stateName)){
             throw new PlaceNotFoundException("Please provide valid state name");
         }
-        return Flux.fromIterable(this.placeRepository.findByStateIgnoreCase(stateName.trim()));
+        return Flux.fromIterable(this.placeRepository.findByStateIgnoreCase(stateName.trim()))
+                .switchIfEmpty(r->Flux.error(new PlaceNotFoundException("No place found with the following state name")));
     }
 
     @Override
@@ -126,6 +128,7 @@ public class PlaceServiceImpl implements PlaceService {
         if(!StringUtils.hasText(city2)){
             throw new PlaceNotFoundException("Please provide valid second city name");
         }
+
         return Flux.fromIterable(this.placeRepository.findPlaceByCityIn(Arrays.asList(city1.toLowerCase().trim(),city2.toLowerCase().trim())));
     }
 
